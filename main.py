@@ -18,29 +18,31 @@ k = paramiko.RSAKey.from_private_key_file(key)
 c = paramiko.SSHClient()
 c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 print("connecting....")
+
 try:
     #connect
     c.connect( hostname = hostname, username = myuser, pkey = k)
-    print("connected!")
-    for command in commands:
-        print("Executing {}".format( command ))
-        stdin , stdout, stderr = c.exec_command(command)
-
-        #printing
-        output = ''
-        outputErr = ''
-        for line in stdout.readlines():
-            output += line
-        
-        for line in stderr.readlines():
-            outputErr += line
-        
-        if output:
-            print(output)
-        else:
-            print("There was no output for this command")
-        if outputErr:
-            print(outputErr)
-    c.close()
 except TimeoutError:
-    print("TimeoutError: " + "maybe you alrady close your ec2 or you dont fix your public IP")
+    print("TimeoutError: check host/username/private key or maybe your instance is alrady shutdown")
+    sys.exit(1)
+print("connected!")
+for command in commands:
+    print("Executing {}".format( command ))
+    stdin , stdout, stderr = c.exec_command(command)
+
+    #printing
+    output = ''
+    outputErr = ''
+    for line in stdout.readlines():
+        output += line
+        
+    for line in stderr.readlines():
+        outputErr += line
+        
+    if output:
+        print(output)
+    else:
+        print("There was no output for this command")
+    if outputErr:
+        print(outputErr)
+c.close()
